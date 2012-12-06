@@ -120,6 +120,11 @@ cris*)
 	# Target: CRIS
 	gdb_target_obs="cris-tdep.o solib-svr4.o"
 	;;
+	
+dcpu16*)
+	# Target: DCPU-16 (MOJANG)
+	gdb_target_obs="dcpu16-tdep.o"
+	;;
 
 frv-*-*)
 	# Target: Fujitsu FRV processor
