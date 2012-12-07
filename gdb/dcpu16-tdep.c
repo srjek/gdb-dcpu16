@@ -55,13 +55,16 @@ struct type * dcpu16_register_type(struct gdbarch *gdbarch, int regnum) {
         case 7:     //J
             return builtin_type(gdbarch)->builtin_uint16;
         case 8:     //PC
-            return builtin_type(gdbarch)->builtin_data_ptr; //Not a function pointer, a builtin_type doesn't exist for code pointers, so data pointer (because everything is data!)
+            return builtin_type(gdbarch)->builtin_uint16;   //Size of data_ptr is off, so using uint16 for now (until I either change the emulator or data_ptr) (TODO)
+            //return builtin_type(gdbarch)->builtin_data_ptr; //Not a function pointer, a builtin_type doesn't exist for code pointers, so data pointer (because everything is data!)
         case 9:     //SP
-            return builtin_type(gdbarch)->builtin_data_ptr;
+            return builtin_type(gdbarch)->builtin_uint16;   //Size of data_ptr is off, so using uint16 for now (until I either change the emulator or data_ptr) (TODO)
+            //return builtin_type(gdbarch)->builtin_data_ptr;
         case 10:    //EX
             return builtin_type(gdbarch)->builtin_uint16;
         case 11:    //IA
-            return builtin_type(gdbarch)->builtin_data_ptr; //Same situation as the PC register
+            return builtin_type(gdbarch)->builtin_uint16;   //Size of data_ptr is off, so using uint16 for now (until I either change the emulator or data_ptr) (TODO)
+            //return builtin_type(gdbarch)->builtin_data_ptr; //Same situation as the PC register
         case 12:    //IAQ
             return builtin_type(gdbarch)->builtin_uint16;   //TODO: Is this even supposed to be here?
     }
