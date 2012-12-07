@@ -1,5 +1,7 @@
 #include "defs.h"
 #include "frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "arch-utils.h"
@@ -89,6 +91,50 @@ int dcpu16_print_insn (bfd_vma vma, struct disassemble_info *info) {   //Disasse
     return print_insn_dcpu16(vma, info);
 }
 
+
+//srjek: I need to do more research to implement the frame functions myself, so I'm going to pull some BS to make this work for assembly programs
+//              First of all, there is only one frame, the top level frame
+//              Second, the stack starts at 0, the corresponding function starts at 0
+enum unwind_stop_reason dcpu16_frame_unwind_stop_reason (struct frame_info * this_frame, void ** this_prologue_cache ) {
+    fprintf_unfiltered(gdb_stdlog, "Going to say NOPE\n");
+    return UNWIND_OUTERMOST;
+}
+void dcpu16_frame_this_id (struct frame_info *this_frame, void **this_prologue_cache, struct frame_id *this_id) {
+    fprintf_unfiltered(gdb_stdlog, "Going to access this_id.... ");
+    this_id->stack_addr = 0;
+    this_id->code_addr = 0;
+    this_id->special_addr = 0;
+    fprintf_unfiltered(gdb_stdlog, "done\n");
+}
+struct value* dcpu16_frame_prev_register(struct frame_info *this_frame, void **this_prologue_cache, int regnum) {
+    fprintf_unfiltered(gdb_stdlog, "NOPE\n");
+    return NULL;
+}
+int dcpu16_frame_sniffer(const struct frame_unwind *self, struct frame_info *this_frame, void **this_prologue_cache) {
+    return 1;   //TODO: find out what this function is supposed to do
+}
+
+
+static const struct frame_unwind dcpu16_frame_unwind = {
+    NORMAL_FRAME, // enum frame_type type
+    dcpu16_frame_unwind_stop_reason, // frame_unwind_stop_reason_ftype *stop_reason
+    dcpu16_frame_this_id, // frame_this_id_ftype *this_id
+    dcpu16_frame_prev_register, // frame_prev_register_ftype *prev_register   //Hopefully with the things I am pulling I don't have to mess with this
+    NULL, // const struct frame_data *unwind_data       //....or this....
+    dcpu16_frame_sniffer, // frame_sniffer_ftype *sniffer               //....or this....
+    NULL, // frame_prev_pc_ftype *prev_pc;              //....or this....
+    NULL, // frame_dealloc_cache_ftype *dealloc_cache;  //....or this....
+};                                                      //....or anything in this structure......
+
+const struct frame_base* dcpu16_base_sniffer(struct frame_info* this_frame) {
+    fprintf_unfiltered(gdb_stdlog, "Going to return NULL, just thought I would let you know\n");
+//    struct frame_base* result = {
+//        dcpu16_frame_unwind,
+//        };
+    return NULL;
+}
+
+
 static struct gdbarch* dcpu16_gdbarch_init(struct gdbarch_info info, struct gdbarch_list *arches) {
     struct gdbarch_list* list = gdbarch_list_lookup_by_info(arches, &info);
     struct gdbarch* result;
@@ -118,6 +164,10 @@ static struct gdbarch* dcpu16_gdbarch_init(struct gdbarch_info info, struct gdba
         
         set_gdbarch_breakpoint_from_pc(result, dcpu16_breakpoint_from_pc);
         set_gdbarch_print_insn(result, dcpu16_print_insn);
+        
+        frame_unwind_append_unwinder(result, &dcpu16_frame_unwind);
+        //frame_base_append_sniffer(result, dcpu16_base_sniffer);
+        //frame_base_set_default(result, dcpu16_base_sniffer);
     }
     
     return result;
