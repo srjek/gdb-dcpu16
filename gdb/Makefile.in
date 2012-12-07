@@ -530,6 +530,7 @@ ALL_TARGET_OBS = \
 	avr-tdep.o \
 	bfin-linux-tdep.o bfin-tdep.o \
 	cris-tdep.o \
+	dcpu16-tdep.o \
 	dicos-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
