@@ -71,15 +71,15 @@ struct type * dcpu16_register_type(struct gdbarch *gdbarch, int regnum) {
     return NULL;    //We don't know what register this is (TODO: anything here to do once we add xml file support?)
 }
 
-//dcpu16 addresses everything in words, but gdb does everything in bytes (especially important for disassembly)
+//dcpu16 addresses everything in words, but gdb does everything in bytes
 CORE_ADDR dcpu16_pointer_to_address(struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf) {
     enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
     CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
-    return addr << 2;
+    return addr << 0;
 }
 void dcpu16_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr) {
     enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-    store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr >> 2);
+    store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr >> 0);
 }
 
 
@@ -100,10 +100,10 @@ CORE_ADDR dcpu16_unwind_sp(struct gdbarch *gdbarch, struct frame_info *next_fram
 }
 
 const gdb_byte *dcpu16_breakpoint_from_pc (gdbarch, pcptr, lenptr) {
-    return NULL;    //Don't support software breakpoints (dcpu16 has no dedicated breakpoint instruction, through others could be repurposed, but only with compatible emulators)
+    return NULL;    //Don't support software breakpoints (dcpu16 has no dedicated breakpoint instruction. Ununsed instructions could be repurposed, but only with compatible emulators, and at risk of future compatiblity)
 }
 int dcpu16_print_insn (bfd_vma vma, struct disassemble_info *info) {   //Disassemlbes an instruction
-    return print_insn_dcpu16(vma, info);
+    return print_insn_dcpu16(vma, info) >> 1;    //NOTE: GDB uses number from here to advance, disassembly expects byte based addresses (maybe gdb does too? :/)
 }
 
 
