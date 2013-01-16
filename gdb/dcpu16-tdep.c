@@ -4,6 +4,7 @@
 #include "frame-base.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
+#include "target-descriptions.h"
 #include "arch-utils.h"
 #include "include/dis-asm.h"
 
@@ -153,17 +154,34 @@ const struct frame_base* dcpu16_base_sniffer(struct frame_info* this_frame) {
 
 
 static struct gdbarch* dcpu16_gdbarch_init(struct gdbarch_info info, struct gdbarch_list *arches) {
+    struct tdesc_arch_data* tdesc_data = NULL;
+    if ((info.target_desc != NULL) && (tdesc_has_registers(info.target_desc))) {    //Check for a remote target description
+        tdesc_data = tdesc_data_alloc();
+        const struct tdesc_feature * core = tdesc_find_feature(info.target_desc, "org.srjek.dcpu16.core");
+        if (core == NULL) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 0, "A")) return NULL;   //Link their regnums to our regnums, or complain if something's missing
+        if (!tdesc_numbered_register (core, tdesc_data, 1, "B")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 2, "C")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 3, "X")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 4, "Y")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 5, "Z")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 6, "I")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 7, "J")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 8, "PC")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 9, "SP")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 10, "EX")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 11, "IA")) return NULL;
+        if (!tdesc_numbered_register (core, tdesc_data, 12, "IAQ")) return NULL;
+    }
+    
     struct gdbarch_list* list = gdbarch_list_lookup_by_info(arches, &info);
     struct gdbarch* result;
     
-    if (info.target_desc == NULL) { //Lets fill in the defaults
-        //Or not (TODO)
-    } else {
-        //TODO: special stuff
-    }
-    
     if (list != NULL) {
         result = list->gdbarch;
+        if (tdesc_data != NULL)
+            tdesc_data_cleanup(tdesc_data);
+        
     } else {        // If we didn't already have a arch configuration, make one
         result = gdbarch_alloc(&info, NULL);
         
@@ -189,6 +207,9 @@ static struct gdbarch* dcpu16_gdbarch_init(struct gdbarch_info info, struct gdba
         frame_unwind_append_unwinder(result, &dcpu16_frame_unwind);
         //frame_base_append_sniffer(result, dcpu16_base_sniffer);
         //frame_base_set_default(result, dcpu16_base_sniffer);
+        
+        if (tdesc_data != NULL)
+            tdesc_use_registers(result, info.target_desc, tdesc_data);
     }
     
     return result;
