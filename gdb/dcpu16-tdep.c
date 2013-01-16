@@ -71,6 +71,7 @@ struct type * dcpu16_register_type(struct gdbarch *gdbarch, int regnum) {
     return NULL;    //We don't know what register this is (TODO: anything here to do once we add xml file support?)
 }
 
+/*
 //dcpu16 addresses everything in words, but gdb does everything in bytes
 CORE_ADDR dcpu16_pointer_to_address(struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf) {
     enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -81,6 +82,7 @@ void dcpu16_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_
     enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
     store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr >> 0);
 }
+*/
 
 
 CORE_ADDR dcpu16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc) {
@@ -171,9 +173,9 @@ static struct gdbarch* dcpu16_gdbarch_init(struct gdbarch_info info, struct gdba
         
         set_gdbarch_register_name(result, dcpu16_register_name);
         set_gdbarch_register_type(result, dcpu16_register_type);
-        set_gdbarch_pointer_to_address(result, dcpu16_pointer_to_address);
-        set_gdbarch_integer_to_address(result, dcpu16_pointer_to_address);
-        set_gdbarch_address_to_pointer(result, dcpu16_address_to_pointer);
+        //set_gdbarch_pointer_to_address(result, dcpu16_pointer_to_address);
+        //set_gdbarch_integer_to_address(result, dcpu16_pointer_to_address);
+        //set_gdbarch_address_to_pointer(result, dcpu16_address_to_pointer);
         
         set_gdbarch_skip_prologue(result, dcpu16_skip_prologue);
         set_gdbarch_inner_than(result, core_addr_lessthan);
